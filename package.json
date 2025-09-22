@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-node-inspector",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Exposes an API endpoint to list all registered n8n nodes with their properties.",
   "keywords": [
     "n8n-community-node-package",
