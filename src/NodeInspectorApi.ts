@@ -1,59 +1,37 @@
 import { Router } from 'express';
 import { Container } from 'typedi';
-import { NodeTypes, INodeType, INodeTypeDescription } from 'n8n-workflow'; // Added INodeType and INodeTypeDescription for better typing
+import { INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 const router = Router();
 
-router.get('/custom/nodes', async (req, res) => {
+router.get('/inspector/nodes', async (req, res) => {
   try {
-    const nodeTypesInstance = Container.get(NodeTypes);
-    const allNodeTypes: INodeType[] = nodeTypesInstance.getAll();
+    // Check for API token authentication
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'API token required. Please provide Bearer token in Authorization header.' });
+    }
 
-    const nodes = allNodeTypes.map((nodeType) => {
-      // Ensure node.description exists before trying to access its properties
-      const description = nodeType.description as INodeTypeDescription | undefined;
+    // For this example, we'll accept any token that's not empty
+    // In production, you'd validate against a stored token
+    const token = authHeader.substring(7);
+    if (!token.trim()) {
+      return res.status(401).json({ error: 'Invalid API token.' });
+    }
 
-      if (!description) {
-        // This case should be rare for well-formed nodes
-        return {
-          name: nodeType.name,
-          displayName: 'N/A (No description)',
-          type: determineNodeType(nodeType.name),
-          version: 'N/A',
-          description: 'Node description unavailable.',
-          inputs: [],
-          outputs: [],
-          credentials: [],
-          properties: [],
-        };
-      }
+    const filter = req.query.filter as string || 'all';
+    const { getFilteredNodes } = await import('./nodeInspectorLogic');
+    const nodes = await getFilteredNodes(filter);
 
-      return {
-        name: nodeType.name,
-        displayName: description.displayName,
-        type: determineNodeType(nodeType.name),
-        version: description.version,
-        description: description.description,
-        // inputs and outputs are arrays of strings like ['main'] or ['main', 'error']
-        inputs: description.inputs || [],
-        outputs: description.outputs || [],
-        credentials: description.credentials || [],
-        properties: description.properties,
-      };
+    res.json({
+      nodes,
+      filter,
+      totalCount: nodes.length,
     });
-
-    res.json(nodes);
   } catch (error) {
     console.error('Failed to retrieve nodes:', error);
     res.status(500).json({ error: 'Failed to retrieve nodes.', details: (error as Error).message });
   }
 });
-
-function determineNodeType(name: string): string {
-  if (name.startsWith('n8n-nodes-base.')) return 'core'; // n8n core nodes often start with 'n8n-nodes-base.'
-  if (name.startsWith('n8n-nodes-')) return 'core-contrib'; // Other nodes shipped with n8n but not in base
-  if (name.startsWith('@')) return 'community'; // Typically scoped packages
-  return 'custom'; // Or unknown
-}
 
 export default router; 
