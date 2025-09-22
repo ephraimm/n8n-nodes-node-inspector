@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-node-inspector",
+  "version": "0.1.0",
+  "description": "Exposes an API endpoint to list all registered n8n nodes with their properties.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n-extension",
+    "api"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ephraimm/n8n-nodes-inspector"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [],
+    "nodes": [],
+    "webhooks": [
+      "dist/index.js"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "typedi": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "n8n-workflow": "*",
+    "prettier": "^2.3.2",
+    "typescript": "~4.8.4"
+  }
+} 
